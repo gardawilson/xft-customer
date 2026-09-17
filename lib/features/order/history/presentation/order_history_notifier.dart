@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xft/features/home/domain/models/order_model.dart';
 import 'package:xft/features/order/history/data/order_history_service.dart';
@@ -23,8 +24,8 @@ class OrderHistoryNotifier extends AsyncNotifier<List<Order>> {
     try {
       final orders = await ref.read(orderHistoryServiceProvider).fetchOrders();
       state = AsyncData(orders);
-    } catch (_) {
-      // sengaja diabaikan
+    } catch (e) {
+      debugPrint('[OrderHistory] silentRefresh error: $e');
     }
   }
 

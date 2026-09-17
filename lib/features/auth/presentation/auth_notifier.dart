@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:xft/features/auth/data/auth_service.dart';
 import 'package:xft/features/auth/domain/models/auth_response.dart';
+import 'package:xft/features/auth/domain/models/user_model.dart';
 import 'package:xft/core/storage/storage_service.dart';
 
 part 'auth_notifier.g.dart';
@@ -18,11 +19,22 @@ class AuthNotifier extends _$AuthNotifier {
       // We don't change the state here, but we can use this information in the router
     }
 
-    // final authService = ref.read(authServiceProvider);
-    // In a real app, we would check for a stored token here
-    // and potentially verify it with an API call.
-    // For now, we'll just return null to show onboarding/login.
-    return null;
+    // Restore session from secure storage
+    final secureStorage = ref.read(secureStorageServiceProvider);
+    final storedToken = await secureStorage.read('access_token');
+    if (storedToken == null) return null;
+
+    final userData = await prefs.readJson('user_data');
+    if (userData == null) return null;
+
+    return AuthResponse(
+      success: true,
+      message: 'Session restored',
+      data: AuthData(
+        token: storedToken,
+        user: UserModel.fromJson(userData),
+      ),
+    );
   }
 
   Future<void> login(String email, String password) async {

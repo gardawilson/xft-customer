@@ -81,3 +81,8 @@ class PrefsStorageService {
 final prefsServiceProvider = Provider<PrefsStorageService>(
   (_) => PrefsStorageService(),
 );
+
+/// Provider for [SecureStorageService] (sensitive data, flutter_secure_storage).
+final secureStorageServiceProvider = Provider<SecureStorageService>(
+  (_) => SecureStorageService(),
+);

@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xft/core/api/api_client.dart';
 import 'package:xft/core/storage/storage_service.dart';
@@ -21,9 +23,17 @@ class AuthService {
 
   Future<AuthResponse> login(String email, String password) async {
     try {
+      String? fcmToken;
+      if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+      }
       final response = await _dio.post(
         '/auth/login',
-        data: {'email': email, 'password': password},
+        data: {
+          'email': email,
+          'password': password,
+          if (fcmToken != null) 'fcm_token': fcmToken,
+        },
       );
 
       final authResponse = AuthResponse.fromJson(response.data);
@@ -58,6 +68,10 @@ class AuthService {
     String password,
   ) async {
     try {
+      String? fcmToken;
+      if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+      }
       final response = await _dio.post(
         '/auth/register',
         data: {
@@ -66,6 +80,7 @@ class AuthService {
           'phone_number': phone,
           'password': password,
           'password_confirmation': password,
+          if (fcmToken != null) 'fcm_token': fcmToken,
         },
       );
 

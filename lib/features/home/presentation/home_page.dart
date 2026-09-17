@@ -25,7 +25,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   // Badge lonceng di MainAppBar tampil terus selama app dibuka (bukan cuma
   // pas tab Pesanan aktif), jadi timer-nya dipasang di sini -- level
   // HomePage -- bukan di dalam OrdersTab, supaya tetap jalan di tab manapun.
-  static const _kNotificationPollInterval = Duration(seconds: 20);
+  static const _kNotificationPollInterval = Duration(seconds: 60);
 
   @override
   void initState() {

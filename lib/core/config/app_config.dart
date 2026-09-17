@@ -10,7 +10,7 @@ const bool kUseProduction = false;
 /// Ganti IP ini setiap kali IP lokal laptop kamu berubah (cek pakai
 /// `ipconfig` di Command Prompt) -- ini SATU-SATUNYA tempat yang perlu
 /// diedit kalau IP laptop kamu ganti, nggak perlu bongkar api_client.dart.
-const String kLocalIp = '192.168.1.53:8000';
+const String kLocalIp = '127.0.0.1:8000';
 
 const String _localBaseUrl = 'http://$kLocalIp/api';
 const String _productionBaseUrl = 'https://xft.bisagroup.co.id/api';

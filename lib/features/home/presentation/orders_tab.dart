@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,13 +12,6 @@ import 'package:xft/features/order/history/presentation/order_history_notifier.d
 
 const _kCategories = ['Aktif', 'Pesanan Selesai', 'Riwayat'];
 
-// Seberapa sering list pesanan ditarik ulang otomatis dari backend, supaya
-// customer tahu kalau status pesanannya berubah (misal jadi "Siap Diambil")
-// tanpa perlu tarik-turun manual. Timer ini otomatis berhenti begitu
-// customer pindah dari tab "Pesanan" (lihat dispose()), jadi tidak terus
-// membebani server selagi tidak dilihat.
-const _kPollInterval = Duration(seconds: 15);
-
 // ── Tab ───────────────────────────────────────────────────────────────────────
 
 class OrdersTab extends ConsumerStatefulWidget {
@@ -32,7 +23,6 @@ class OrdersTab extends ConsumerStatefulWidget {
 
 class _OrdersTabState extends ConsumerState<OrdersTab> {
   String _selectedCategory = _kCategories.first;
-  Timer? _pollTimer;
 
   // "Pesanan Selesai" dan "Riwayat" menampilkan data yang sama (semua
   // pesanan tidak aktif: selesai/batal/ditolak) -- bedanya cuma cara
@@ -50,20 +40,6 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
       grouped.putIfAbsent(order.pickupLocationName, () => []).add(order);
     }
     return grouped;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _pollTimer = Timer.periodic(_kPollInterval, (_) {
-      ref.read(orderHistoryProvider.notifier).silentRefresh();
-    });
-  }
-
-  @override
-  void dispose() {
-    _pollTimer?.cancel();
-    super.dispose();
   }
 
   @override
