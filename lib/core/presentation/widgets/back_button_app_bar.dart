@@ -16,7 +16,7 @@ class BackButtonAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   const BackButtonAppBar({
     super.key,
-    this.label = 'kembali',
+    this.label = 'Kembali',
     this.actions = const [],
     this.bottom,
   });

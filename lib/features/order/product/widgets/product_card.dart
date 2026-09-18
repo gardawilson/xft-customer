@@ -9,7 +9,7 @@ import 'product_detail_sheet.dart';
 class ProductCard extends StatelessWidget {
   final Product product;
   final int outletId;
-  final VoidCallback? onProductAdded;
+  final void Function(Product product, int quantity)? onProductAdded;
 
   const ProductCard({
     super.key,
@@ -27,9 +27,10 @@ class ProductCard extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => ProductDetailSheet(product: product, outletId: outletId),
-    ).then((updated) {
-      if (updated == true) {
-        onProductAdded?.call();
+    ).then((result) {
+      if (result is Map && result['success'] == true) {
+        final quantity = result['quantity'] as int? ?? 1;
+        onProductAdded?.call(product, quantity);
       }
     });
   }
@@ -109,18 +110,6 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  if (product.hasVariants) ...[
-                    Text(
-                      product.variants.map((v) => v.name).join(' / '),
-                      style: TextStyle(
-                        color: AppColors.xftSurface.withValues(alpha: 0.6),
-                        fontSize: 11,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                  ],
                   Opacity(
                     opacity: product.isSoldOut ? 0.5 : 1.0,
                     child: Text(
@@ -168,43 +157,23 @@ class ProductCard extends StatelessWidget {
             ),
             const SizedBox(width: 16),
             if (!product.isSoldOut)
-              if (product.quantity != null && product.quantity! > 0)
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppColors.xftAccent,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.xftPrimary, width: 1.0),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '${product.quantity}',
-                    style: const TextStyle(
-                      color: AppColors.xftSurface,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                )
-              else
-                Material(
-                  color: AppColors.xftSurface,
-                  shape: const CircleBorder(),
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: () => _openDetailSheet(context),
-                    child: const SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: Icon(
-                        LucideIcons.plus,
-                        color: AppColors.xftAccent,
-                        size: 18,
-                      ),
+              Material(
+                color: AppColors.xftSurface,
+                shape: const CircleBorder(),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => _openDetailSheet(context),
+                  child: const SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: Icon(
+                      LucideIcons.plus,
+                      color: AppColors.xftAccent,
+                      size: 18,
                     ),
                   ),
                 ),
+              ),
           ],
         ),
       ),

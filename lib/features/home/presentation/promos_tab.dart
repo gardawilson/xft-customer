@@ -38,7 +38,7 @@ class PromosTab extends ConsumerWidget {
           return RefreshIndicator(
             onRefresh: () => ref.read(promoListProvider.notifier).refresh(),
             child: ListView.separated(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               itemCount: promos.length,
               separatorBuilder: (context, index) => const SizedBox(height: 24),
               itemBuilder: (context, index) => _PromoCard(promo: promos[index]),

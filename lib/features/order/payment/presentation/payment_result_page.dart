@@ -32,14 +32,21 @@ class PaymentResultPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  isSuccess ? 'Pembayaran Berhasil!' : 'Pembayaran Belum Selesai',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.xftSurface),
+                  isSuccess
+                      ? 'Pembayaran Berhasil!'
+                      : 'Selesaikan Pembayaran di Outlet',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.xftSurface,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'No. Pesanan: $orderNumber',
+                  'Tunjukkan nomor pesanan $orderNumber ini di kasir dan lakukan pembayaran di outlet',
                   style: const TextStyle(fontSize: 13, color: Colors.black54),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
                 SizedBox(
@@ -48,12 +55,18 @@ class PaymentResultPage extends StatelessWidget {
                     onPressed: () => context.go('/'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.xftSurface,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: const Text(
                       'Kembali ke Beranda',
-                      style: TextStyle(color: AppColors.xftAccent, fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        color: AppColors.xftAccent,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),

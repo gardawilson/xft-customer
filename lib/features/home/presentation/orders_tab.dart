@@ -130,17 +130,18 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
         if (filtered.isEmpty) {
           return RefreshIndicator(
             onRefresh: () => ref.read(orderHistoryProvider.notifier).refresh(),
-            child: ListView(
-              children: const [
-                SizedBox(height: 120),
-                Center(
-                  child: Text(
-                    'Tidak ada pesanan',
-                    style: TextStyle(color: Colors.black54),
+              child: ListView(
+                children: const [
+                  SizedBox(height: 120),
+                  Center(
+                    child: Text(
+                      'Tidak ada pesanan',
+                      style: TextStyle(color: Colors.black54),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                  SizedBox(height: 80),
+                ],
+              ),
           );
         }
 
@@ -151,7 +152,7 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
         return RefreshIndicator(
           onRefresh: () => ref.read(orderHistoryProvider.notifier).refresh(),
           child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
             itemCount: filtered.length,
             separatorBuilder: (context, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) =>
@@ -170,7 +171,7 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
     return RefreshIndicator(
       onRefresh: () => ref.read(orderHistoryProvider.notifier).refresh(),
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
         children: grouped.entries.expand((entry) {
           final outletName = entry.key;
           final outletOrders = entry.value;
@@ -212,6 +213,7 @@ class _OrdersTabState extends ConsumerState<OrdersTab> {
     return RefreshIndicator(
       onRefresh: () => ref.read(orderHistoryProvider.notifier).refresh(),
       child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
         children: [
           const SizedBox(height: 80),
           const Icon(

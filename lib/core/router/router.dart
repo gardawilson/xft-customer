@@ -27,6 +27,7 @@ import 'package:xft/features/order/payment/presentation/payment_webview_page.dar
 import 'package:xft/features/order/payment/presentation/espay_va_page.dart';
 import 'package:xft/features/order/payment/data/order_service.dart';
 import 'package:xft/features/order/payment/presentation/payment_result_page.dart';
+import 'package:xft/features/order/detail/presentation/order_detail_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final refreshListenable = ValueNotifier<bool>(false);
@@ -77,6 +78,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final result = state.extra as CheckoutResult;
           return EspayVaPage(checkoutResult: result);
+        },
+      ),
+      GoRoute(
+        path: '/order-detail',
+        builder: (context, state) {
+          final orderId = state.uri.queryParameters['order_id'] ?? '';
+          return OrderDetailPage(orderId: orderId);
         },
       ),
       GoRoute(

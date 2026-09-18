@@ -18,7 +18,7 @@ class SettingsTab extends ConsumerWidget {
         backgroundColor: AppColors.xftBackground,
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 96),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -69,7 +69,7 @@ class SettingsTab extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.xftBackground,
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
         children: [
           // ── Profile header ───────────────────────────────────────────────
           Column(

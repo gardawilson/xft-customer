@@ -9,7 +9,7 @@ import 'product_detail_sheet.dart';
 class TopPickProductCard extends StatelessWidget {
   final Product product;
   final int outletId;
-  final VoidCallback? onProductAdded;
+  final void Function(Product product, int quantity)? onProductAdded;
 
   const TopPickProductCard({
     super.key,
@@ -27,9 +27,10 @@ class TopPickProductCard extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => ProductDetailSheet(product: product, outletId: outletId),
-    ).then((updated) {
-      if (updated == true) {
-        onProductAdded?.call();
+    ).then((result) {
+      if (result is Map && result['success'] == true) {
+        final quantity = result['quantity'] as int? ?? 1;
+        onProductAdded?.call(product, quantity);
       }
     });
   }
@@ -83,56 +84,28 @@ class TopPickProductCard extends StatelessWidget {
                     left: 8,
                     child: ProductBadgeWidget(badge: product.badge!),
                   ),
-                if (!product.isSoldOut) ...[
-                  if (product.quantity != null && product.quantity! > 0)
-                    Positioned(
-                      bottom: 8,
-                      right: 8,
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: AppColors.xftAccent,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.xftPrimary,
-                            width: 1,
-                          ),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${product.quantity}',
-                          style: const TextStyle(
-                            color: AppColors.xftSurface,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    Positioned(
-                      bottom: 8,
-                      right: 8,
-                      child: Material(
-                        color: AppColors.xftSurface,
-                        shape: const CircleBorder(),
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () => _openDetailSheet(context),
-                          child: const SizedBox(
-                            width: 32,
-                            height: 32,
-                            child: Icon(
-                              LucideIcons.plus,
-                              color: AppColors.xftAccent,
-                              size: 18,
-                            ),
+                if (!product.isSoldOut)
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Material(
+                      color: AppColors.xftSurface,
+                      shape: const CircleBorder(),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () => _openDetailSheet(context),
+                        child: const SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: Icon(
+                            LucideIcons.plus,
+                            color: AppColors.xftAccent,
+                            size: 18,
                           ),
                         ),
                       ),
                     ),
-                ],
+                  ),
               ],
             ),
             Expanded(
@@ -173,18 +146,7 @@ class TopPickProductCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (product.hasVariants) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            product.variants.map((v) => v.name).join(' / '),
-                            style: TextStyle(
-                              color: AppColors.xftSurface.withValues(alpha: 0.6),
-                              fontSize: 11,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+
                       ],
                     ),
                     Row(

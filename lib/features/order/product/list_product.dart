@@ -4,6 +4,8 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:xft/core/theme/app_colors.dart';
+import 'package:xft/features/order/cart/presentation/cart_notifier.dart';
+import 'package:xft/features/order/cart/domain/models/cart_item_model.dart';
 
 import 'menu_notifier.dart';
 import 'models/product_model.dart';
@@ -11,7 +13,7 @@ import 'widgets/shake_widget.dart';
 import 'widgets/sticky_tab_bar_delegate.dart';
 import 'widgets/product_card.dart';
 import 'widgets/top_pick_product_card.dart';
-import 'widgets/cart_summary_sheet.dart';
+import 'widgets/sticky_cart_bar.dart';
 
 class ListProductPage extends ConsumerStatefulWidget {
   final int outletId;
@@ -45,42 +47,15 @@ class ListProductPageState extends ConsumerState<ListProductPage>
   final GlobalKey<ShakeWidgetState> _cartFabShakeKey =
   GlobalKey<ShakeWidgetState>();
 
-  List<Product> get _cartProducts {
-    final List<Product> list = [];
-    for (final category in _allCategories) {
-      for (final product in category.products) {
-        if (product.quantity != null && product.quantity! > 0) {
-          if (!list.any((p) => p.id == product.id)) {
-            list.add(product);
-          }
-        }
-      }
+  void _updateProductQuantity(Product product, int addedQuantity) async {
+    await ref.read(cartProvider.notifier).addItem(
+      outletId: widget.outletId,
+      productId: product.id,
+      quantity: addedQuantity,
+    );
+    if (mounted) {
+      _cartFabShakeKey.currentState?.shake();
     }
-    return list;
-  }
-
-  String get _cartSummaryText {
-    final cart = _cartProducts;
-    if (cart.isEmpty) return '';
-    final firstProduct = cart.first;
-    final firstQty = firstProduct.quantity ?? 0;
-    final firstText = '$firstQty ${firstProduct.name}';
-
-    if (cart.length == 1) {
-      return firstText;
-    } else {
-      final othersCount = cart.length - 1;
-      final othersText = othersCount == 1 ? '1 other' : '$othersCount others';
-      return '$firstText and $othersText';
-    }
-  }
-
-  int get _cartTotalPrice {
-    return _cartProducts.fold(0, (sum, p) {
-      final priceInt =
-          int.tryParse(p.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-      return sum + (priceInt * (p.quantity ?? 0));
-    });
   }
 
   String _formatPrice(int price) {
@@ -95,6 +70,20 @@ class ListProductPageState extends ConsumerState<ListProductPage>
       }
     }
     return 'Rp ${buffer.toString().split('').reversed.join('')}';
+  }
+
+  String _buildCartSummaryText(CartData? cart) {
+    if (cart == null || cart.items.isEmpty) return '';
+    final firstItem = cart.items.first;
+    final firstText = '${firstItem.quantity} ${firstItem.productName}';
+
+    if (cart.items.length == 1) {
+      return firstText;
+    } else {
+      final othersCount = cart.items.length - 1;
+      final othersText = othersCount == 1 ? '1 other' : '$othersCount others';
+      return '$firstText and $othersText';
+    }
   }
 
   @override
@@ -228,6 +217,13 @@ class ListProductPageState extends ConsumerState<ListProductPage>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final menuAsync = ref.watch(menuListProvider(widget.outletId));
+    final cartAsync = ref.watch(cartProvider);
+
+    final cartData = cartAsync.value;
+    final cartTotalItems = cartData?.totalItems ?? 0;
+    final cartTotalPrice = cartData?.totalPrice ?? 0;
+    final cartSummaryText = _buildCartSummaryText(cartData);
+    final cartIsEmpty = cartData == null || cartData.items.isEmpty;
 
     ref.listen<AsyncValue<List<Category>>>(menuListProvider(widget.outletId), (previous, next) {
       next.whenData((categories) {
@@ -467,7 +463,7 @@ class ListProductPageState extends ConsumerState<ListProductPage>
                                     return TopPickProductCard(
                                       product: product,
                                       outletId: widget.outletId,
-                                      onProductAdded: () => _cartFabShakeKey.currentState?.shake(),
+                                      onProductAdded: _updateProductQuantity,
                                     );
                                   },
                                 ),
@@ -477,7 +473,7 @@ class ListProductPageState extends ConsumerState<ListProductPage>
                                     (product) => ProductCard(
                                   product: product,
                                   outletId: widget.outletId,
-                                  onProductAdded: () => _cartFabShakeKey.currentState?.shake(),
+                                  onProductAdded: _updateProductQuantity,
                                 ),
                               ),
                           ],
@@ -518,88 +514,22 @@ class ListProductPageState extends ConsumerState<ListProductPage>
                       ),
                     ),
                 ],
-              const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
+              const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
             ],
           ),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: _cartProducts.isEmpty
+        bottomNavigationBar: cartIsEmpty
             ? null
             : ShakeWidget(
           key: _cartFabShakeKey,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: GestureDetector(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => CartSummarySheet(
-                    cartProducts: _cartProducts,
-                    totalPrice: _cartTotalPrice,
-                    outletId: widget.outletId,
-                    formatPrice: _formatPrice,
-                    onCartUpdated: () => _cartFabShakeKey.currentState?.shake(),
-                  ),
-                );
-              },
-              child: Container(
-                width: double.infinity,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: AppColors.xftSurface,
-                  borderRadius: BorderRadius.circular(100),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _cartSummaryText,
-                        style: const TextStyle(
-                          color: AppColors.xftAccent,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.xftAccent,
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _formatPrice(_cartTotalPrice),
-                            style: const TextStyle(
-                              color: AppColors.xftSurface,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(LucideIcons.chevron_right, color: AppColors.xftSurface, size: 16),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          child: StickyCartBar(
+            totalItems: cartTotalItems,
+            totalPrice: cartTotalPrice,
+            summaryText: cartSummaryText,
+            formatPrice: _formatPrice,
+            onTap: () {
+              context.push('/cart');
+            },
           ),
         ),
       ),

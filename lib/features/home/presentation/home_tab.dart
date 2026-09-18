@@ -31,7 +31,7 @@ class HomeTab extends ConsumerWidget {
             const PromotionalCarousel(),
             const SizedBox(height: 24),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
               child: Column(
                 children: [
                   if (!isEmailVerified) ...[
@@ -45,6 +45,7 @@ class HomeTab extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
+            const SizedBox(height: 80),
           ],
         ),
       ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:xft/core/theme/app_colors.dart';
 import '../models/product_model.dart';
 import 'product_badge_widget.dart';
@@ -125,8 +124,7 @@ class _ProductDetailSheetState extends ConsumerState<ProductDetailSheet> {
       if (!mounted) {
         return;
       }
-      Navigator.pop(context, true);
-      context.push('/cart');
+      Navigator.pop(context, {'success': true, 'quantity': _quantity});
     } catch (e) {
       if (!mounted) {
         return;

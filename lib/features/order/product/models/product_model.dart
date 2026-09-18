@@ -116,6 +116,32 @@ class Product {
     this.modifierGroups = const [],
   });
 
+  Product copyWith({
+    int? id,
+    String? name,
+    String? description,
+    String? price,
+    String? imageUrl,
+    int? quantity,
+    bool? isSoldOut,
+    ProductBadge? badge,
+    List<ProductVariant>? variants,
+    List<ModifierGroup>? modifierGroups,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      imageUrl: imageUrl ?? this.imageUrl,
+      quantity: quantity ?? this.quantity,
+      isSoldOut: isSoldOut ?? this.isSoldOut,
+      badge: badge ?? this.badge,
+      variants: variants ?? this.variants,
+      modifierGroups: modifierGroups ?? this.modifierGroups,
+    );
+  }
+
   bool get hasVariants => variants.isNotEmpty;
   bool get hasModifiers => modifierGroups.isNotEmpty;
 

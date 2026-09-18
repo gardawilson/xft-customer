@@ -18,7 +18,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Firebase hanya diinisialisasi di Android/iOS, skip untuk web/desktop
-  if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
+  if (!kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS)) {
     await Firebase.initializeApp();
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
@@ -49,7 +51,9 @@ class _XftAppState extends ConsumerState<XftApp> {
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS)) {
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS)) {
       _initFCM();
     }
   }
@@ -57,10 +61,26 @@ class _XftAppState extends ConsumerState<XftApp> {
   Future<void> _initFCM() async {
     final messaging = FirebaseMessaging.instance;
 
+    // Cek apakah aplikasi dibuka dari notifikasi background (cold start)
+    final initialMessage = await messaging.getInitialMessage();
+    if (initialMessage != null) {
+      final data = initialMessage.data;
+      final orderId = data['order_id']?.toString();
+      final category = data['category']?.toString();
+      if (orderId != null && category == 'Pesanan') {
+        await ref.read(orderHistoryProvider.notifier).refresh();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(routerProvider).push('/order-detail?order_id=$orderId');
+        });
+      }
+    }
+
     // Listen for foreground messages — daftarkan SEBELUM permission
     // supaya tidak ada message yang terlewat.
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('[FCM foreground] title=${message.notification?.title} body=${message.notification?.body}');
+      debugPrint(
+        '[FCM foreground] title=${message.notification?.title} body=${message.notification?.body}',
+      );
       if (!mounted) return;
       final notification = message.notification;
       if (notification == null) return;
@@ -76,18 +96,26 @@ class _XftAppState extends ConsumerState<XftApp> {
       ref.read(notificationListProvider.notifier).silentRefresh();
     });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
       if (!mounted) return;
-      ref.read(routerProvider).go('/');
+
+      await ref.read(orderHistoryProvider.notifier).refresh();
+      ref.read(notificationListProvider.notifier).silentRefresh();
+
+      final data = message.data;
+      final orderId = data['order_id']?.toString();
+      final category = data['category']?.toString();
+
+      if (orderId != null && category == 'Pesanan') {
+        ref.read(routerProvider).push('/order-detail?order_id=$orderId');
+      } else {
+        ref.read(routerProvider).go('/');
+      }
     });
 
     // Request permission (required for Android 13+)
     try {
-      await messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      await messaging.requestPermission(alert: true, badge: true, sound: true);
     } catch (e) {
       debugPrint('[FCM] requestPermission error: $e');
     }
@@ -103,14 +131,14 @@ class _XftAppState extends ConsumerState<XftApp> {
 
     return MaterialApp.router(
       scaffoldMessengerKey: _scaffoldKey,
-      title: 'Xing Fu Tang',
+      title: 'Xing Fu Tang Indonesia',
       debugShowCheckedModeBanner: false,
       locale: kIsWeb ? DevicePreview.locale(context) : null,
       builder: kIsWeb ? DevicePreview.appBuilder : null,
       routerConfig: router,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
     );
   }
 }

@@ -43,6 +43,8 @@ class _CartPageState extends ConsumerState<CartPage> {
       );
       if (!mounted) return;
 
+      await ref.read(cartProvider.notifier).refresh();
+
       context.push(
         '/payment-result?status=pay_at_store&order_number=${result.orderNumber}',
       );

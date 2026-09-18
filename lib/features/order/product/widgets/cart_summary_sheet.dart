@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 import 'package:xft/core/theme/app_colors.dart';
 import '../models/product_model.dart';
 import 'product_detail_sheet.dart';
@@ -49,8 +50,8 @@ class _CartSummarySheetState extends State<CartSummarySheet> {
         isEdit: true,
         initialQuantity: product.quantity ?? 1,
       ),
-    ).then((updated) {
-      if (updated == true) {
+    ).then((result) {
+      if (result is Map && result['success'] == true) {
         widget.onCartUpdated?.call();
       }
     });
@@ -269,9 +270,10 @@ class _CartSummarySheetState extends State<CartSummarySheet> {
             ),
             child: SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+                child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
+                  context.push('/cart');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.xftSurface,
